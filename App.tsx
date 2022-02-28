@@ -17,6 +17,10 @@ import {
   Text,
   useColorScheme,
   View,
+  TextInput,
+  stations,
+  costs,
+  Button
 } from 'react-native';
 
 import {
@@ -28,8 +32,10 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
+  title: string,
+  stations: string,
+  costs: string;
+}> = ({children, title, firstText, secondText }) => {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -73,24 +79,56 @@ const App = () => {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            edited again.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+            <TextInput
+                value={stations}
+                placeholder="stations"
+                style={{height: 40, borderColor: 'white', borderWidth: 1}}
+                />
+            <TextInput
+                value={costs}
+                placeholder="costs"
+                style={{height: 40, borderColor: 'green', borderWidth: 1}}
+                />
+            <Button
+                title="Calculate"
+                onPress={ () => Alert.alert('Simple Button pressed')}
+              />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const stringToNumberArray = (stringArray: string) => {
+    return stringArray.split(",").map(elem => {
+      let n = Number(elem);
+      return n === 0 ? n : n || elem;
+    });
+}
+
+const pickStartIndex = (stations: [], costs: [], previousIndex: number = 0 ) => {
+    let startPointIndex : number = -1;
+    for (let i = previousIndex; i < stationArr.length; i++) {
+        startPointIndex = stations[i] > costs[i] ? startPointIndex : i;
+    }
+    return startPointIndex;
+}
+
+const doRoute = (stations: [], costs: [], startPoint: number) => {
+    for (let i = startPoint; i < stations.length; i++) {
+
+    }
+    for (let j = 0; j = startPoint; j++) {
+
+    }
+}
+
+const doTheTrick = (stations: string, costs: string) => {
+    let stationsArray: [] = stringToNumberArray(stations);
+    let costsArray: [] = stringToNumberArray(costs);
+    let startPoint: number = pickStartIndex(stationsArray, costsArray);
+    doRoute(stations, costsArray, startPoint);
+}
 
 const styles = StyleSheet.create({
   sectionContainer: {
