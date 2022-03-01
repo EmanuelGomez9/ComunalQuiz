@@ -15,7 +15,7 @@ import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 
-const App = () => {
+const App = (props) => {
   const stringToNumberArray = (stringArray: string) => {
     return stringArray.split(",").map(elem => {
       let n:number = Number(elem);
@@ -23,24 +23,32 @@ const App = () => {
     });
   }
 
-  const pickStartIndex = (stations: [], costs: [], previousIndex: number = 0 ) => {
-    let startPointIndex : number = -1;
-    for (let i:number = previousIndex; i < stations.length; i++) {
-      if (stations[i] > costs[i]) {
-        startPointIndex = i;
-        break;
-      }
-    }
-    return startPointIndex;
- }
+  const pickStartIndex = (stations: [], costs: []) => {
+    let possibleStartPoints: number[] = [];
+    for (let i:number = 0; i < stations.length; i++) {
+      if (stations[i] >= costs[i]) {
+        possibleStartPoints.push(i);
+      };
+    };
+    return possibleStartPoints;
+  }
 
   const doRoute = (stations: [], costs: [], startPoint: number) => {
     let currentGas: number = stations[startPoint];
     for (let i:number = startPoint; i < stations.length; i++) {
       if (i !== stations.length-1) {
+        // veo algunos casos extremos en los que esto funciona,
+        // por el hecho de que la suma y la resta se efectuan a la par,
+        // en lugar de verificar si la resta da mayor o igual a 0 antes de sumar.
+        // esto segun logica me parece un error.
+        // Por el hecho de que no deberia poder gastar lo que no tengo,
+        // pero por ahora lo dejare, porque asi esta la logica de los ejemplos.
         currentGas = currentGas - costs[i] + stations[i+1];
       } else {
         currentGas = currentGas - costs[i] + stations[0];
+        if (startPoint===0 && currentGas>=0) {
+            return startPoint;
+        };
       };
       if (currentGas <= 0) return -1;
     };
@@ -50,13 +58,11 @@ const App = () => {
             if (j!==startPoint-1) {
                 currentGas = currentGas - costs[j] + stations[j+1];
             } else {
-                if (currentGas - costs[startPoint-1] >= 0) {
-                    return startPoint;
-                };
+                return currentGas - costs[startPoint-1] >= 0 ? startPoint : -1;
             };
           };
         } else {
-            return -1
+            return -1;
         };
     };
   }
@@ -65,11 +71,18 @@ const App = () => {
     let result: number = -1;
     let stationsArray: [] = stringToNumberArray(stations);
     let costsArray: [] = stringToNumberArray(costs);
-    let startPoint: number = pickStartIndex(stationsArray, costsArray);
-    if (startPoint > -1) {
-        let result = doRoute(stationsArray, costsArray, startPoint);
-
-    }
+    // aca estaba pensando buscar el primer punto posible y luego utilizar recursividad,
+    // pero luego me parecio mas eficiente buscar todos los puntos de inicio posible
+    // regresarlos como array y buscar en ellos uno por uno
+    // y en caso que uno funcione, hacer un break y mandar este como la solucion.
+    let possibleStartPoints: number[] = pickStartIndex(stationsArray, costsArray);
+    if (possibleStartPoints.length > 0) {
+        for (let i:number = 0; i < possibleStartPoints.length; i++) {
+          result = doRoute(stationsArray, costsArray, possibleStartPoints[i]);
+          if (result !== -1) break;
+        };
+    };
+    setResult(result);
   }
 
   const [stations, setStations] = useState('');
